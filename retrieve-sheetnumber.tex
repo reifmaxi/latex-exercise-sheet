@@ -1,0 +1,17 @@
+% Automatically retrieve the number of the current sheet.
+\newcommand{\ExSheetCurrentNumber}{%
+  \directlua{%
+    local currentFile = "\jobname"
+    local fileNumber = currentFile:gsub('[^0-9]','')
+    local function trimLeadingZeros(arg)
+      while arg:sub(1,1) == '0' and ( string.len(arg) >= 2 ) do
+        arg = arg:sub(2)
+      end
+      return arg
+    end
+    local sheetNumber = trimLeadingZeros(fileNumber)
+    tex.print(sheetNumber)
+  }
+}
+
+\setsheetnumber{\ExSheetCurrentNumber}

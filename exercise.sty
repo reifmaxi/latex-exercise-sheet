@@ -1,0 +1,233 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{exercise}
+[2022/07/22 My personal LaTeX package for exercise sheets.]
+
+\DeclareOption{solution}{\newif\ifsolution}
+\DeclareOption*{\PackageWarning{exercise}{Unknown ‘\CurrentOption’}}
+\ProcessOptions\relax
+
+% Vertical space between paragraphs.
+\setlength{\parskip}{1ex}
+
+% Reference the number of pages in your LaTeX document through the introduction
+% of a new label which can be referenced like \pageref{LastPage} to give a
+% reference to the last page of a document.
+\RequirePackage{lastpage}
+
+% Manages culturally-determined typographical (and other) rules for a wide range
+% of languages.
+\RequirePackage{polyglossia}
+
+% Use English terminology by default.
+\setdefaultlanguage{english}
+\newcommand{\ExSheetProblemText}{Problem}
+\newcommand{\ExSheetBonusText}{Bonus~problem}
+\newcommand{\ExSheetSolutionText}{Solution}
+\newcommand{\ExSheetPointsText}{points}
+\newcommand{\ExSheetNameText}{Problem~Sheet}
+\newcommand{\ExSheetSubmissionText}{To~be~handed~in~by}
+\newcommand{\ExSheetPagesText}{Page~\pagemark~of~\pageref{LastPage}}
+
+% Possibly use German terminology.
+\ExplSyntaxOn
+\newcommand{\setcourselanguage}[1]{
+  \str_if_eq:NNT {#1} {german} {%
+    \setdefaultlanguage[spelling=new, babelshorthands=true]{german}
+    \renewcommand{\ExSheetProblemText}{Aufgabe}
+    \renewcommand{\ExSheetBonusText}{Bonusaufgabe}
+    \renewcommand{\ExSheetSolutionText}{Lösung}
+    \renewcommand{\ExSheetPointsText}{Punkte}
+    \renewcommand{\ExSheetNameText}{Übungsblatt}
+    \renewcommand{\ExSheetSubmissionText}{Abzugeben~bis}
+    \renewcommand{\ExSheetPagesText}{Seite~\pagemark~von~\pageref{LastPage}}
+  }
+}
+\ExplSyntaxOff
+
+% Provides an end user interface to scrlayer, allowing the user to define and
+% manage page styles by controlling page headers and footers.
+\RequirePackage{scrlayer-scrpage}
+\cfoot{\ExSheetPagesText}
+\addtokomafont{pagefoot}{\normalfont}
+
+% Environment for exercises.
+\newcounter{problem}
+\NewDocumentEnvironment{problem}{O{} O{}}{%
+  \refstepcounter{problem}
+  \bigskip
+  \noindent \rmfamily \textbf{\ExSheetProblemText~\theproblem .}
+  \ifx&#2& \else \medspace (#2) \fi
+  \ifx&#1& \else \hfill #1 \ExSheetPointsText \fi
+  \newline
+}{}
+
+% Environment for extra exercises.
+\NewDocumentEnvironment{bonusproblem}{O{} O{}}{%
+  \bigskip
+  \noindent \rmfamily \textbf{\ExSheetBonusText .}
+  \ifx&#2& \else \medspace (#2) \fi
+  \ifx&#1& \else \hfill #1 \ExSheetPointsText \fi
+  \newline
+}{}
+
+% Provides a new author interface for creating new environments.
+\RequirePackage{environ}
+
+% Provides the framed environment and the command \MakeFramed to make own
+% framed-style environments.
+\RequirePackage{framed}
+
+% Environment for solutions.
+\NewEnviron{solution}{%
+  \begin{oframed}
+    \noindent \textit{\ExSheetSolutionText.} \BODY
+    \hfill \ensuremath{\checkmark}
+  \end{oframed}
+}
+
+% Hidden environment.
+\NewEnviron{hidden}{}
+
+% Hide solutions if option "solution" is not given.
+\ExplSyntaxOn
+\bool_if_exist:NF \ifsolution {%
+  \let\solution\hidden
+  \let\endsolution\endhidden
+}
+\ExplSyntaxOff
+
+% Provides a key-value interface for optional arguments to the \includegraphics
+% command.
+\RequirePackage{graphicx}
+
+% Provides a means of using facilities analogous to those of the caption
+% package, when writing captions for subfigures and the like.
+\RequirePackage{subcaption}
+
+% Style of the main heading.
+\renewcommand{\maketitle}{%
+  \begin{figure}[ht]
+    \begin{subcaptionblock}[C]{0.5\textwidth} %T for top
+      \raggedright
+      \ExSheetInfo
+    \end{subcaptionblock}
+    \hfill
+    \begin{subcaptionblock}[C]{0.4\textwidth} %T for top
+      \ExSheetLogo
+    \end{subcaptionblock}
+  \end{figure}
+  \begin{center}
+    {\Large\bfseries\sffamily \ExSheetTitle}
+
+    {\normalsize\itshape\rmfamily \ExSheetTopics}
+
+    \ExSheetSubmission
+
+    \vspace*{-1em}
+    \hrulefill
+  \end{center}
+}
+
+\ExplSyntaxOn
+% Init
+\newcommand{\ExSheetInit}{%
+  \tl_new:N \l_exsheet_logo_tl
+  \tl_new:N \l_exsheet_lecture_tl
+  \tl_new:N \l_exsheet_term_tl
+  \seq_new:N \l_exsheet_prof_seq
+  \seq_new:N \l_exsheet_staff_seq
+  \seq_new:N \l_exsheet_chair_seq
+  \tl_new:N \l_exsheet_number_tl
+  \tl_new:N \l_exsheet_topics_tl
+  \prop_new:N \l_exsheet_submission_prop
+}
+\ExSheetInit
+
+% Fetch information provided by the author.
+\newcommand{\setlogo}[1]{
+  \tl_set:Nn \l_exsheet_logo_tl {#1}
+}
+\newcommand{\setlecture}[1]{
+  \tl_set:Nn \l_exsheet_lecture_tl {#1}
+}
+\newcommand{\setterm}[1]{
+  \tl_set:Nn \l_exsheet_term_tl {#1}
+}
+\newcommand{\setprof}[1]{
+  % push student name to the right
+  \seq_put_right:Nn \l_exsheet_prof_seq {#1}
+}
+\newcommand{\setstaff}[1]{
+  % push student name to the right
+  \seq_put_right:Nn \l_exsheet_staff_seq {#1}
+}
+\newcommand{\setchair}[1]{
+  % push student name to the right
+  \seq_put_right:Nn \l_exsheet_chair_seq {#1}
+}
+\newcommand{\setsheetnumber}[1]{
+  \tl_set:Nn \l_exsheet_number_tl {#1}
+}
+\newcommand{\settopics}[1]{
+  \tl_set:Nn \l_exsheet_topics_tl {#1}
+}
+\newcommand{\setsubmissiontime}[1]{
+  \prop_put:Nnn \l_exsheet_submission_prop {time} {#1}
+}
+\newcommand{\setsubmissionplace}[1]{
+  \prop_put:Nnn \l_exsheet_submission_prop {place} {#1}
+}
+
+% Various information regarding the exercise sheet.
+\newcommand{\ExSheetInfo}{%
+  \seq_use:Nn \l_exsheet_prof_seq { ,\ }
+  \seq_if_empty:NF \l_exsheet_prof_seq {\linebreak}
+  \seq_use:Nn \l_exsheet_staff_seq { ,\ }
+  \seq_if_empty:NF \l_exsheet_staff_seq {\linebreak}
+  \seq_use:Nn \l_exsheet_chair_seq { ,\ }
+  \seq_if_empty:NF \l_exsheet_chair_seq {\linebreak}
+  \tl_use:N \l_exsheet_term_tl
+}
+
+% Possibly include logo.
+\newcommand{\ExSheetLogo}{%
+  \tl_if_empty:NF \l_exsheet_logo_tl{%
+    \includegraphics[height=2cm]{\tl_use:N \l_exsheet_logo_tl}
+  }
+}
+
+% The main title of the exercise sheet.
+\newcommand{\ExSheetTitle}{
+  \tl_set:Nn \l_exsheet_title_tl {\ExSheetNameText}
+
+  \tl_if_empty:NF \l_exsheet_number_tl{%
+    \tl_put_right:Nn \l_exsheet_title_tl {~}
+  }
+  \tl_concat:NNN
+  \l_exsheet_title_tl \l_exsheet_title_tl \l_exsheet_number_tl
+
+  \tl_if_empty:NF \l_exsheet_lecture_tl{%
+    \tl_put_left:Nn \l_exsheet_title_tl {·}
+  }
+  \tl_concat:NNN
+  \l_exsheet_title_tl \l_exsheet_lecture_tl \l_exsheet_title_tl
+
+  \tl_use:N \l_exsheet_title_tl
+}
+
+% The subtitle of the exercise sheet.
+\newcommand{\ExSheetTopics}{%
+  \vspace*{-0.25em}
+  \tl_use:N \l_exsheet_topics_tl
+}
+
+% The submission information of the exercise sheet.
+\newcommand{\ExSheetSubmission}{%
+  \prop_if_empty:NF \l_exsheet_submission_prop {%
+    \vspace*{0.5em}
+    \ExSheetSubmissionText\
+    \prop_item:Nn \l_exsheet_submission_prop {time}~
+    \prop_item:Nn \l_exsheet_submission_prop {place}.
+  }
+}
+\ExplSyntaxOff

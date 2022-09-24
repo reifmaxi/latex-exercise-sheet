@@ -1,0 +1,98 @@
+\documentclass[a4paper]{layout}
+
+% My personal LaTeX package for exercise sheets.
+\usepackage[solution]{exercise}
+
+% Lecture specific information.
+\setlogo{logo}
+\setlecture{Sample~Lecture}
+\setterm{Winter Term 2022/23}
+\setprof{Prof.~Dr.~Empty~Set}
+\setstaff{Employee~of~the~Month}
+\setstaff{Some~Assistant}
+\setchair{Chair~of~Fancy~Shit}
+
+% Sheet specific information.
+\setsheetnumber{1}
+\settopics{New macros and environments}
+\setsubmissiontime{Wed, 14 Dec, 12:00}
+\setsubmissionplace{in the lecture}
+
+% ------------------------------------ END -------------------------------------
+
+\begin{document}
+
+\maketitle
+
+This document is created with the package \texttt{exercise.sty}.
+It provides the following macros to create a custom document header and title
+using \texttt{\textbackslash maketitle}:
+\begin{itemize}
+  \item
+    \texttt{\textbackslash setlogo\{\}}
+    to choose the logo used.
+  \item
+    \texttt{\textbackslash setlecture\{\}}
+    and \texttt{\textbackslash setterm\{\}}
+    to specify the associated lecture.
+  \item[$\times$]
+    \texttt{\textbackslash setprof\{\}},
+    \texttt{\textbackslash setstaff\{\}},
+    and \texttt{\textbackslash setchair\{\}}
+    to specify involved persons.
+  \item
+    \texttt{\textbackslash setsheetnumber\{\}},
+    \texttt{\textbackslash setcontents\{\}}
+    to give information about the sheet.
+  \item
+  \texttt{\textbackslash setsubmissiontime\{\}},
+  \texttt{\textbackslash setsubmissiondate\{\}}
+  to specify the submission.
+\end{itemize}
+All macros are optional.
+Those listed under $\times$ are intended for possible repeated use:
+each usage appends the corresponding content separated by commas.
+It is advisable to \texttt{\textbackslash input}
+unvarying information from a separate \texttt{.tex}-file
+to save time and ensure consistency across the sheets.
+The sheet number can be retrieved automatically
+from the file name by \texttt{retrieve-sheetnumber.tex},
+if Lua\LaTeX\ and a naming convention like
+\texttt{sheet\_01.tex} or \texttt{12sheet.tex}
+(where the only digits correspond to the sheet number) is used.
+Leading zeros thereby are ignored.
+
+Furthermore, new environments are provided for problems and solutions,
+which are shown and explained below.
+The language used (English by default) can be changed to German by
+\texttt{\textbackslash setcourselanguage\{german\}}.
+Other languages can be added by adopting lines \texttt{34} to \texttt{43}
+of \texttt{exercise.sty}.
+
+\begin{problem}[4][The \texttt{problem} environment]
+  The \texttt{problem} environment is invoked by
+  \[
+    \texttt{\textbackslash begin\{problem\}[<points>][<description>]}
+    \quad \unicodeellipsis \quad
+    \texttt{\textbackslash end\{problem\}}.
+  \]
+  Both \texttt{<points>} and \texttt{<description>} are optional.
+\end{problem}
+
+\begin{solution}
+  The \texttt{solution} environment is invoked by
+  \[
+    \texttt{\textbackslash begin\{solution\}}
+    \quad \unicodeellipsis \quad
+    \texttt{\textbackslash end\{solution\}}.
+  \]
+  The contents of \texttt{solution} environments are only visible,
+  if \texttt{exercise.sty} is loaded with the option \texttt{solution}.
+\end{solution}
+
+\begin{bonusproblem}[3]
+  Finally there is also an environment for bonus problems,
+  which behaves exactly like \texttt{problem} except for the numbering.
+\end{bonusproblem}
+
+\end{document}
